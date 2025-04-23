@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Print Shop Upload</title>
+</head>
+<body>
+  <h2>Send File for Printing</h2>
+  <form id="printForm">
+    <input type="text" name="name" placeholder="Your Name" required><br>
+    <input type="email" name="email" placeholder="Your Email" required><br>
+    <input type="text" name="paper" placeholder="Paper Type" required><br>
+    <input type="number" name="copies" placeholder="Number of Copies" required><br>
+    <textarea name="instructions" placeholder="Instructions" required></textarea><br>
+    <input type="file" id="fileInput" required><br><br>
+    <button type="submit">Send to WhatsApp</button>
+  </form>
+
+  <script>
+    document.getElementById("printForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+      alert("Submitting form...");
+
+      const form = e.target;
+      const file = document.getElementById("fileInput").files[0];
+      const reader = new FileReader();
+
+      reader.onload = async function() {
+        const fileBase64 = reader.result.split(",")[1];
+
+        const formData = new URLSearchParams();
+        formData.append("name", form.name.value);
+        formData.append("email", form.email.value);
+        formData.append("paper", form.paper.value);
+        formData.append("copies", form.copies.value);
+        formData.append("instructions", form.instructions.value);
+        formData.append("fileBase64", fileBase64);
+        formData.append("filename", file.name);
+        formData.append("mimeType", file.type);
+
+        const response = await fetch("https://script.google.com/macros/s/AKfycbyMCiWVf2_y1JTgL6zrKN8IwhsvyojYoXlhHNG5zt1z_AyZSE26E0aigia20zTudpNW/exec", {
+          method: "POST",
+          body: formData
+        });
+
+        const message = await response.text();
+
+        // Open WhatsApp
+        const whatsappNumber = "918349818494"; // no "+" or "00"
+        const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+        window.open(whatsappLink, "_blank");
+      };
+
+      reader.readAsDataURL(file);
+    });
+  </script>
+</body>
+</html>
